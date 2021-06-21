@@ -11,7 +11,9 @@ import 'package:dashboard/utility/libs/pichart/legend_options.dart';
 import 'package:dashboard/utility/libs/pichart/options.dart';
 import 'package:dashboard/utility/libs/pichart/pi_chart.dart';
 import 'package:dashboard/views/add_teacher.dart';
+import 'package:dashboard/views/search_student.dart';
 import 'package:dashboard/views/supervisors.dart';
+import 'package:dashboard/views/teachers.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:dashboard/views/gender.dart';
 import 'package:dashboard/views/input_field.dart';
@@ -76,7 +78,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   Widget build(BuildContext context) {
     return Container(
       child: Center(
-        child: Text("waiting"),
+        child: Image.asset("assets/images/karari.png"),
       ),
     );
   }
@@ -92,7 +94,7 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   TextEditingController phoneController = new TextEditingController();
-
+  final SearchStudent _delegate = SearchStudent();
   TextEditingController passwordController = new TextEditingController();
   bool isLoading = false;
   var _formKey = GlobalKey<FormState>();
@@ -408,6 +410,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+
+
+
+    final SearchStudent _delegate = SearchStudent();
+
   List<Department> depts = [];
   Map<String, double> dataMap = {
     "Flutter": 5,
@@ -451,7 +458,7 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 20,
             ),
-            InkWell(
+            GestureDetector(
               onTap: () {
                 Get.to(() => AddSupervisor());
 
@@ -508,26 +515,45 @@ class _HomeState extends State<Home> {
             SizedBox(
               height: 45,
             ),
-            Text(
-              'الاساتذة',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: (){
+ Get.to(() => Teachers());
+
+
+              },
+              child: Text(
+                'الاساتذة',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
             ),
-            Text(
-              'بحث عن طالب',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+
+              onTap: () async{
+//SearchStudent
+
+
+await showSearch(
+                  context: context,
+                  delegate: _delegate,
+                );
+              } ,
+              child: Text(
+                'بحث عن طالب',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
@@ -795,7 +821,7 @@ class _AddSupervisorState extends State<AddSupervisor> {
       });
     });
   }
-
+  final SearchStudent _delegate = SearchStudent();
 bool isLoading =  false;
 var _scaffoldKey =  GlobalKey<ScaffoldState>();
   @override
@@ -846,13 +872,12 @@ var _scaffoldKey =  GlobalKey<ScaffoldState>();
             ),
             InkWell(
               onTap: () {
+                Get.to(() => AddTeacher());
 
-
-
-                Get.to(AddTeacher());
+                //    Navigator.of(context).pop();
               },
               child: Text(
-                'اضافة استاذ',
+                'إضافة استاذ',
                 style: TextStyle(
                   fontFamily: 'Avenir',
                   fontSize: 24,
@@ -864,38 +889,60 @@ var _scaffoldKey =  GlobalKey<ScaffoldState>();
             SizedBox(
               height: 45,
             ),
-            Text(
-              'المشرفين',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () {
+                Get.to(() => Supervisors());
+
+                //    Navigator.of(context).pop();
+              },
+              child: Text(
+                'المشرفين',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
             ),
-            Text(
-              'الاساتذة',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () {
+                Get.to(() => Teachers());
+              },
+              child: Text(
+                'الاساتذة',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
             ),
-            Text(
-              'بحث عن طالب',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () async {
+//SearchStudent
+
+                await showSearch(
+                  context: context,
+                  delegate: _delegate,
+                );
+              },
+              child: Text(
+                'بحث عن طالب',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
@@ -923,6 +970,7 @@ var _scaffoldKey =  GlobalKey<ScaffoldState>();
           ],
         ),
       ),
+
       appBar: new GFAppBar(
 //          leading  :  new  IconButton(onPressed: (){
 

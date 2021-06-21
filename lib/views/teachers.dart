@@ -1,10 +1,15 @@
 import 'package:dashboard/main.dart';
 import 'package:dashboard/models/supervisor.dart';
+import 'package:dashboard/models/teacher.dart';
 import 'package:dashboard/service/main_provider.dart';
 import 'package:dashboard/views/add_teacher.dart';
+import 'package:dashboard/views/edit_password.dart';
+import 'package:dashboard/views/search_student.dart';
+import 'package:dashboard/views/supervisors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
+import 'package:load/load.dart';
 import 'package:provider/provider.dart';
 
 class Teachers extends StatefulWidget {
@@ -16,14 +21,15 @@ class Teachers extends StatefulWidget {
 
 class _SupervisorsState extends State<Teachers> {
   var _scaffoldKey = new GlobalKey<ScaffoldState>();
-
+final SearchStudent _delegate = SearchStudent();
   @override
   Widget build(BuildContext context) {
     var mainProvider = Provider.of<MainProvider>(context);
 
     return Scaffold(
+       
       key: _scaffoldKey,
-      endDrawer: Drawer(
+       endDrawer: Drawer(
         child: ListView(
           children: <Widget>[
             SizedBox(
@@ -83,7 +89,7 @@ class _SupervisorsState extends State<Teachers> {
             ),
             InkWell(
               onTap: () {
-                Get.to(() => Teachers());
+                Get.to(() => Supervisors());
 
                 //    Navigator.of(context).pop();
               },
@@ -100,26 +106,41 @@ class _SupervisorsState extends State<Teachers> {
             SizedBox(
               height: 45,
             ),
-            Text(
-              'الاساتذة',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () {
+                Get.to(() => Teachers());
+              },
+              child: Text(
+                'الاساتذة',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
             ),
-            Text(
-              'بحث عن طالب',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () async {
+//SearchStudent
+
+                await showSearch(
+                  context: context,
+                  delegate: _delegate,
+                );
+              },
+              child: Text(
+                'بحث عن طالب',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
@@ -155,16 +176,16 @@ class _SupervisorsState extends State<Teachers> {
 
         elevation: 0.0,
         title: Text(
-          'لوحة التحكم',
+          'الأساتذة',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
       body: Padding(
         padding: EdgeInsets.all(10.0),
-        child: StreamBuilder<List<Supervisor>>(
-          stream: mainProvider.getSupervisors(),
+        child: StreamBuilder<List<Teacher>>(
+          stream: mainProvider.getTeachers(),
           builder:
-              (BuildContext context, AsyncSnapshot<List<Supervisor>> snapshot) {
+              (BuildContext context, AsyncSnapshot<List<Teacher>> snapshot) {
             if (snapshot.hasData) {
               return ListView.builder(
                 itemCount: snapshot.data.length,
@@ -178,9 +199,69 @@ class _SupervisorsState extends State<Teachers> {
                         child: Row(
                           children: [
                             IconButton(
-                                onPressed: () {}, icon: Icon(Icons.delete)),
+                                onPressed: ()async {
+
+    
+
+    // Create button
+                                  Widget okButton = FlatButton(
+                                    child: Text("OK"),
+                                    onPressed: () async {
+
+
+
+                                      var future = await showLoadingDialog();
+
+                                      await mainProvider.deleteTeacher(
+                                          snapshot.data[index].id);
+
+                                      future.dismiss();
+
+ Navigator.of(context).pop();
+
+                                        setState(() {});
+
+
+                                    },
+                                  );
+                                  Widget cancelButton = FlatButton(
+                                    child: Text("cancel"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                  // Create AlertDialog
+                                  AlertDialog alert = AlertDialog(
+                                    title: Text("Delete"),
+                                    content: Text("تأكيد عملية الحذف"),
+                                    actions: [okButton, cancelButton],
+                                  );
+
+                                  // show the dialog
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return alert;
+                                    },
+                                  );
+                                }, icon: Icon(Icons.delete)),
                             IconButton(
-                                onPressed: () {}, icon: Icon(Icons.edit)),
+                                onPressed: () async{
+
+Navigator.of(context).push(
+
+  MaterialPageRoute(builder: (_){
+    return EditPassword();
+  } ,   
+  settings: RouteSettings(arguments: {"type":"teacher" ,  "id": snapshot.data[index].id
+                                        })
+  
+  ) ,
+
+);
+
+
+                                }, icon: Icon(Icons.edit)),
                           ],
                         ),
                       ),
@@ -196,6 +277,42 @@ class _SupervisorsState extends State<Teachers> {
           },
         ),
       ),
+    );
+  }
+
+
+    showAlertDialog(BuildContext context) {
+
+        var mainProvider = Provider.of<MainProvider>(context);
+
+    // Create button
+    Widget okButton = FlatButton(
+      child: Text("OK"),
+      onPressed: ()   async{
+      
+      },
+    );
+ Widget cancelButton = FlatButton(
+      child: Text("cancel"),
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+    );
+    // Create AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: Text("Delete"),
+      content: Text("تأكيد عملية الحذف"),
+      actions: [
+        okButton,
+      ],
+    );
+
+    // show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
     );
   }
 }

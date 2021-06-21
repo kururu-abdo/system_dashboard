@@ -1,10 +1,14 @@
 import 'package:dashboard/main.dart';
 import 'package:dashboard/service/main_provider.dart';
+import 'package:dashboard/utility/toastNotification.dart';
 import 'package:dashboard/views/add_teacher.dart';
+import 'package:dashboard/views/search_student.dart';
 import 'package:dashboard/views/supervisors.dart';
+import 'package:dashboard/views/teachers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:getwidget/getwidget.dart';
+import 'package:load/load.dart';
 import 'package:provider/provider.dart';
 
 class EditPassword extends StatefulWidget {
@@ -18,7 +22,9 @@ class _EditPasswordState extends State<EditPassword> {
 
 TextEditingController passwordController =  new TextEditingController();
    var _scaffoldKey = new GlobalKey<ScaffoldState>();
+   var   _formKey  =  GlobalKey<FormState>();
 
+   final SearchStudent _delegate = SearchStudent();
   @override
   Widget build(BuildContext context) {
  var mainProvider = Provider.of<MainProvider>(context);
@@ -67,7 +73,7 @@ TextEditingController passwordController =  new TextEditingController();
             SizedBox(
               height: 45,
             ),
-             InkWell(
+            InkWell(
               onTap: () {
                 Get.to(() => AddTeacher());
 
@@ -87,7 +93,7 @@ TextEditingController passwordController =  new TextEditingController();
               height: 45,
             ),
             InkWell(
-               onTap: () {
+              onTap: () {
                 Get.to(() => Supervisors());
 
                 //    Navigator.of(context).pop();
@@ -105,26 +111,41 @@ TextEditingController passwordController =  new TextEditingController();
             SizedBox(
               height: 45,
             ),
-            Text(
-              'الاساتذة',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () {
+                Get.to(() => Teachers());
+              },
+              child: Text(
+                'الاساتذة',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
             ),
-            Text(
-              'بحث عن طالب',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () async {
+//SearchStudent
+
+                await showSearch(
+                  context: context,
+                  delegate: _delegate,
+                );
+              },
+              child: Text(
+                'بحث عن طالب',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
@@ -165,51 +186,107 @@ TextEditingController passwordController =  new TextEditingController();
         ),
       ),
 body: Center(
-  child: Column(
-    children: [
-      Padding(  
-                      padding: EdgeInsets.all(50),  
-                      child: TextFormField( 
-                        controller: passwordController, 
-                        decoration: InputDecoration(  
-                          border: OutlineInputBorder(),  
-                          labelText: 'كلمة السر',  
-                          hintText: 'كلمة السر الجديدة',  
+  child: Form(
+    key: _formKey,
+    child: Column(
+      children: [
+        Padding(  
+                        padding: EdgeInsets.all(50),  
+                        child: TextFormField( 
+                          controller: passwordController, 
+                          decoration: InputDecoration(  
+                            border: OutlineInputBorder(),  
+                            labelText: 'كلمة السر',  
+                            hintText: 'كلمة السر الجديدة',  
+  
+                          
+                          ),
+  
+                          validator: (str){
+                            if (str.length <=0 || str==null) {
+                              return "هذا الحقل مطلوب"  ;
+                            }
+  
+                            return null;
+                          },  
+                        ),  
+                      ),
+  
+  
+  
+                        InkWell(
+                onTap: ()   async{
+  
+  
+  if (data['type']=="teacher") {
 
-                        
-                        ),
+     if(_formKey.currentState.validate()){
+    var id =  data['id'];
+          var future = await showLoadingDialog(tapDismiss: false);
 
-                        validator: (str){
-                          if (str.length <=0 || str==null) {
-                            return "هذا الحقل مطلوب"  ;
-                          }
+  await mainProvider.updateTeacher(id, passwordController.text);
+  
+  ToastNotification.showSuccessToast("تم تحديث كلمة السر بنجاح", context);
+  future.dismiss();
+  
+     }  
+  
+  }  else if (data['type']=="supervisor"){
+    if(_formKey.currentState.validate()){
+      var future = await showLoadingDialog(tapDismiss: false);
+  var id = data['id'];
+                      await mainProvider.updateSupervisor(
+                          id, passwordController.text);
 
-                          return null;
-                        },  
-                      ),  
+                      ToastNotification.showSuccessToast(
+                          "تم تحديث كلمة السر بنجاح", context);
+
+                          future.dismiss();
+    }
+
+  
+  
+  }
+  else{
+  var id = data['id'];  
+      var future = await showLoadingDialog(tapDismiss: false);
+
+ await mainProvider.updateStudent(
+                        id, passwordController.text);
+
+                    ToastNotification.showSuccessToast(
+                        "تم تحديث كلمة السر بنجاح", context);
+
+                    future.dismiss();
+
+  }  
+  
+  
+                },
+                child: Container(
+                  width: 200,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      color: Colors.blue),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      "تحديث كلمة السر",
+                      textAlign: TextAlign.center,
                     ),
-
-
-
-                      InkWell(
-              onTap: () {},
-              child: Container(
-                width: 200,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.blue),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    "تحديث كلمة السر",
-                    textAlign: TextAlign.center,
                   ),
                 ),
-              ),
-            )
-    ],
+              )
+      ],
+    ),
   ),
 ),
     );
   }
 }
+
+
+
+// settings: RouteSettings(
+//                     arguments: tasks[index],
+//                   ),

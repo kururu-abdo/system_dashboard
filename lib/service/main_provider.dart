@@ -3,6 +3,7 @@ import 'dart:io';
 
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dashboard/models/api_response.dart';
 import 'package:dashboard/models/dept.dart';
 import 'package:dashboard/models/level.dart';
 import 'package:dashboard/models/semester.dart';
@@ -264,17 +265,18 @@ return stats;
 }
 double reciprocal(double d) => 1 / d;
 
-Future<Student>  getStudentById(int id ,  Department  dept) async {
+Future<APIresponse<Student>>  getStudentById(int id ) async {
   try {
     QuerySnapshot data = await FirebaseFirestore.instance
           .collection('student')
           .where('id_number', isEqualTo: id.toString())
-          .where('dept'  , isEqualTo: dept.toJson())
           .get();
 
 if (data.docs.length>0) {
   Student student =  Student.fromJson(data.docs.first.data());
-  return  student;
+  return APIresponse<Student>(data:student );
+  
+   
 }
 
   return  null;
@@ -330,27 +332,65 @@ if (available) {
    
   }
 
-  Future<void> updateTeacher(Teacher teacher) async {
-    var future = await showLoadingDialog();
 
+
+
+  Future<void> updateTeacher(String teacher_id ,   String newPassword) async {
+debugPrint(teacher_id);
+    CollectionReference data =
+         FirebaseFirestore.instance.collection('teacher');
+
+    var selectedEvent = await data.where('id', isEqualTo: teacher_id).get();
+    var doc_id = selectedEvent.docs.first.id;
+    await data.doc(doc_id).update({
+    "password" :  newPassword
+    });
+
+  }
+
+ Future<void> deleteTeacher(String teacher_id) async {
     CollectionReference data =
         await FirebaseFirestore.instance.collection('teacher');
 
-    var selectedEvent = await data.where('id', isEqualTo: teacher.id).get();
+    var selectedEvent = await data.where('id', isEqualTo: teacher_id).get();
     var doc_id = selectedEvent.docs.first.id;
-    await data.doc(doc_id).update({
-      'name': teacher.name,
-      'phone': teacher.phone,
-      'degree': teacher.degree,
-      'semester': teacher.semester.toJson(),
-      'address': teacher.address,
-      'role': 'أستاذ'
-    });
-
-    future.dismiss();
+    await data.doc(doc_id).delete();
   }
 
+ Future<void> updateSupervisor(String id, String newPassword) async {
+    CollectionReference data =
+         FirebaseFirestore.instance.collection('supervisor');
 
+    var selectedEvent = await data.where('id', isEqualTo: id).get();
+    var doc_id = selectedEvent.docs.first.id;
+    await data.doc(doc_id).update({"password": newPassword});
+  }
+   Future<void> deleteSupervisor(String id) async {
+    CollectionReference data =
+         FirebaseFirestore.instance.collection('supervisor');
+
+    var selectedEvent = await data.where('id', isEqualTo: id).get();
+    var doc_id = selectedEvent.docs.first.id;
+    await data.doc(doc_id).delete();
+  }
+
+Future<void> updateStudent(String id, String newPassword) async {
+    CollectionReference data =
+         FirebaseFirestore.instance.collection('student');
+
+    var selectedEvent = await data.where('id_number', isEqualTo: id).get();
+    var doc_id = selectedEvent.docs.first.id;
+    await data.doc(doc_id).update({"password": newPassword});
+  }
+Future<List<Student>> searchStudent(String query)  async{
+
+  FirebaseFirestore.instance
+  .collection('student')
+  // .where('name', whereIn: query)
+  .get();
+
+}
+  
 
 
 

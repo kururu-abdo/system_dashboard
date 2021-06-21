@@ -2,31 +2,33 @@ import 'package:dashboard/main.dart';
 import 'package:dashboard/models/supervisor.dart';
 import 'package:dashboard/service/main_provider.dart';
 import 'package:dashboard/views/add_teacher.dart';
+import 'package:dashboard/views/edit_password.dart';
+import 'package:dashboard/views/search_student.dart';
+import 'package:dashboard/views/teachers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
+import 'package:load/load.dart';
 import 'package:provider/provider.dart';
 
 class Supervisors extends StatefulWidget {
-  const Supervisors({ Key key }) : super(key: key);
+  const Supervisors({Key key}) : super(key: key);
 
   @override
   _SupervisorsState createState() => _SupervisorsState();
 }
 
 class _SupervisorsState extends State<Supervisors> {
-
-
-    var _scaffoldKey = new GlobalKey<ScaffoldState>();
-
+  var _scaffoldKey = new GlobalKey<ScaffoldState>();
+final SearchStudent _delegate = SearchStudent();
   @override
   Widget build(BuildContext context) {
+    var mainProvider = Provider.of<MainProvider>(context);
 
-        var mainProvider = Provider.of<MainProvider>(context);
-
-   return Scaffold(
+    return Scaffold(
+      appBar: AppBar(title: Text("المشرفين"),  centerTitle: true,),
       key: _scaffoldKey,
-      endDrawer: Drawer(
+       endDrawer: Drawer(
         child: ListView(
           children: <Widget>[
             SizedBox(
@@ -65,7 +67,7 @@ class _SupervisorsState extends State<Supervisors> {
             SizedBox(
               height: 45,
             ),
-             InkWell(
+            InkWell(
               onTap: () {
                 Get.to(() => AddTeacher());
 
@@ -85,7 +87,7 @@ class _SupervisorsState extends State<Supervisors> {
               height: 45,
             ),
             InkWell(
-               onTap: () {
+              onTap: () {
                 Get.to(() => Supervisors());
 
                 //    Navigator.of(context).pop();
@@ -103,26 +105,41 @@ class _SupervisorsState extends State<Supervisors> {
             SizedBox(
               height: 45,
             ),
-            Text(
-              'الاساتذة',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () {
+                Get.to(() => Teachers());
+              },
+              child: Text(
+                'الاساتذة',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
             ),
-            Text(
-              'بحث عن طالب',
-              style: TextStyle(
-                fontFamily: 'Avenir',
-                fontSize: 24,
-                fontWeight: FontWeight.w700,
+            InkWell(
+              onTap: () async {
+//SearchStudent
+
+                await showSearch(
+                  context: context,
+                  delegate: _delegate,
+                );
+              },
+              child: Text(
+                'بحث عن طالب',
+                style: TextStyle(
+                  fontFamily: 'Avenir',
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
             ),
             SizedBox(
               height: 45,
@@ -150,63 +167,115 @@ class _SupervisorsState extends State<Supervisors> {
           ],
         ),
       ),
-      appBar: new GFAppBar(
-//          leading  :  new  IconButton(onPressed: (){
+      body: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: StreamBuilder<List<Supervisor>>(
+          stream: mainProvider.getSupervisors(),
+          builder:
+              (BuildContext context, AsyncSnapshot<List<Supervisor>> snapshot) {
+            if (snapshot.hasData) {
+              return ListView.builder(
+                itemCount: snapshot.data.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return Card(
+                    elevation: 8.0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                    child: ListTile(
+                      title: Text(snapshot.data[index].name),
+                      trailing: Container(
+                        width: 80,
+                        child: Row(
+                          children: [
+                            IconButton(
+                                onPressed: () {
+    
 
-// _scaffoldKey.currentState.openEndDrawer();
-//          }, icon: Icon(Icons.menu)) ,
+    // Create button
+                                  Widget okButton = FlatButton(
+                                    child: Text("OK"),
+                                    onPressed: () async {
 
-        elevation: 0.0,
-        title: Text(
-          'لوحة التحكم',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                  var future = await showLoadingDialog(
+                                          tapDismiss: false);
+
+                                      await mainProvider.deleteSupervisor(
+                                          snapshot.data[index].id);
+
+                                      future.dismiss();
+                                       Navigator.of(context).pop();
+                                      setState(() {
+                                        
+                                      });
+
+
+                                    },
+                                  );
+                                  Widget cancelButton = FlatButton(
+                                    child: Text("cancel"),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  );
+                                  // Create AlertDialog
+                                  AlertDialog alert = AlertDialog(
+                                    title: Text("Delete"),
+                                    content: Text("تأكيد عملية الحذف"),
+                                    actions: [okButton, cancelButton],
+                                  );
+
+                                  // show the dialog
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return alert;
+                                    },
+                                  );
+
+
+                                }, icon: Icon(Icons.delete)),
+                            IconButton(
+                                onPressed: ()  async{
+
+Navigator.of(context).push(
+
+  MaterialPageRoute(builder: (_){
+    return EditPassword();
+  } ,   
+  settings: RouteSettings(arguments: {"type":"supervisor" ,  "id": snapshot.data[index].id
+                                        })
+  
+  ) );
+
+
+
+
+
+                                }
+                                
+                                
+                                
+                                , icon: Icon(Icons.edit)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              );
+            }
+
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          },
         ),
       ),
+    );
+  }
 
-body: Padding(padding: EdgeInsets.all(10.0) ,  
+  showAlertDialog(BuildContext context) {
 
-
-child: StreamBuilder<List<Supervisor>>(
-  stream: mainProvider.getSupervisors(),
- 
-  builder: (BuildContext context, AsyncSnapshot<List<Supervisor>> snapshot) {
-   if (snapshot.hasData) {
-     return ListView.builder(
-       itemCount: snapshot.data.length,
-       itemBuilder: (BuildContext context, int index) {
-       return    Card(
-         elevation: 8.0,
-
-
-        shape: RoundedRectangleBorder(
-
-          borderRadius: BorderRadius.all(Radius.circular(10.0))
-        ),
-         child: ListTile(title: Text(snapshot.data[index].name) ,
-         trailing: Container(
-           width: 80,
-           child: Row(
-             children: [
-               IconButton(onPressed: (){}, icon: Icon(Icons.delete) ),
-               IconButton(
-                                  onPressed: () {}, icon: Icon(Icons.edit)),
-       
-             ],
-           ),
-         ),
-         ),
-       );
-      },
-     );
-   }
-
-return Center(child: CircularProgressIndicator(),);
-  },
-),
-
-),
-
-       );
-      
+   
   }
 }
