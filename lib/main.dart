@@ -385,11 +385,11 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
         locale: Locale("ar", ""),
         localizationsDelegates: [],
-        theme: ThemeData(
-          primaryColor: Colors.green ,
-          accentColor: Colors.greenAccent ,
+        // theme: ThemeData(
+        //   primaryColor: Colors.green ,
+        //   accentColor: Colors.greenAccent ,
          
-        ),
+        // ),
         routes: {Home.id: (context) => Home()},
         debugShowCheckedModeBanner: false,
         
@@ -996,7 +996,7 @@ var _scaffoldKey =  GlobalKey<ScaffoldState>();
                 Container(
                   width: MediaQuery.of(context).size.width / 3.3,
                   height: MediaQuery.of(context).size.height,
-                  color: Colors.green[600],
+                  color: Colors.blueAccent,
                   child: Padding(
                     padding:
                         EdgeInsets.only(top: 70.0, right: 50.0, left: 50.0),
